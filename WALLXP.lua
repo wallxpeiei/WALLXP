@@ -1,21 +1,22 @@
+--//==================================================
 --// WALLXP UI LIBRARY
---// Version 1.1
---// Window + Sidebar + Tabs
+--// Version 1.2
+--// Window + Tabs + Section + Button + Toggle
+--//==================================================
 
 local WALLXP = {}
 WALLXP.__index = WALLXP
 
+--// Services
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local Player = Players.LocalPlayer
 
---==================================================
--- Services / GUI
---==================================================
-
-local CoreGui = game:GetService("CoreGui")
+--//==================================================
+--// GUI
+--//==================================================
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WALLXP_UI"
@@ -23,38 +24,56 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local success = pcall(function()
-    ScreenGui.Parent = CoreGui
+    ScreenGui.Parent = game:GetService("CoreGui")
 end)
 
 if not success or not ScreenGui.Parent then
     ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 end
 
---==================================================
--- Utility
---==================================================
+--//==================================================
+--// Utility
+--//==================================================
 
-local function Create(className, properties, parent)
-    local object = Instance.new(className)
+local function Create(ClassName, Properties, Parent)
 
-    for property, value in pairs(properties or {}) do
-        object[property] = value
+    local Object = Instance.new(ClassName)
+
+    for Property, Value in pairs(Properties or {}) do
+        Object[Property] = Value
     end
 
-    object.Parent = parent
+    Object.Parent = Parent
 
-    return object
+    return Object
 end
 
-local function Corner(parent, radius)
-    return Create("UICorner", {
-        CornerRadius = UDim.new(0, radius)
-    }, parent)
+local function AddCorner(Object, Radius)
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, Radius)
+    Corner.Parent = Object
+
+    return Corner
 end
 
---==================================================
--- Create Window
---==================================================
+local function Tween(Object, Time, Properties)
+
+    return TweenService:Create(
+        Object,
+        TweenInfo.new(
+            Time,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        Properties
+    )
+
+end
+
+--//==================================================
+--// Create Window
+--//==================================================
 
 function WALLXP:CreateWindow(Settings)
 
@@ -63,23 +82,20 @@ function WALLXP:CreateWindow(Settings)
     local WindowName = Settings.Name or "WALLXP"
     local WindowSubtitle = Settings.Subtitle or "Custom UI Library"
 
-    --==================================================
-    -- Window
-    --==================================================
-
+    --// Window
     local Window = Create("Frame", {
         Name = "Window",
         Size = UDim2.fromOffset(600, 330),
-            Position = UDim2.new(0.5, -300, 0.5, -165),
+        Position = UDim2.new(0.5, -300, 0.5, -165),
         BackgroundColor3 = Color3.fromRGB(17, 17, 21),
         BorderSizePixel = 0
     }, ScreenGui)
 
-    Corner(Window, 12)
+    AddCorner(Window, 12)
 
-    --==================================================
-    -- Top Bar
-    --==================================================
+    --//==================================================
+    --// Top Bar
+    --//==================================================
 
     local TopBar = Create("Frame", {
         Name = "TopBar",
@@ -87,7 +103,7 @@ function WALLXP:CreateWindow(Settings)
         BackgroundTransparency = 1
     }, Window)
 
-    -- Title
+    --// Title
 
     Create("TextLabel", {
         Name = "Title",
@@ -101,7 +117,7 @@ function WALLXP:CreateWindow(Settings)
         TextXAlignment = Enum.TextXAlignment.Left
     }, TopBar)
 
-    -- Subtitle
+    --// Subtitle
 
     Create("TextLabel", {
         Name = "Subtitle",
@@ -115,9 +131,9 @@ function WALLXP:CreateWindow(Settings)
         TextXAlignment = Enum.TextXAlignment.Left
     }, TopBar)
 
-    --==================================================
-    -- Close
-    --==================================================
+    --//==================================================
+    --// Close Button
+    --//==================================================
 
     local Close = Create("TextButton", {
         Name = "Close",
@@ -133,15 +149,15 @@ function WALLXP:CreateWindow(Settings)
         AutoButtonColor = false
     }, TopBar)
 
-    Corner(Close, 8)
+    AddCorner(Close, 8)
 
     Close.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
     end)
 
-    --==================================================
-    -- Main Area
-    --==================================================
+    --//==================================================
+    --// Main Area
+    --//==================================================
 
     local MainArea = Create("Frame", {
         Name = "MainArea",
@@ -151,25 +167,25 @@ function WALLXP:CreateWindow(Settings)
         BorderSizePixel = 0
     }, Window)
 
-    Corner(MainArea, 10)
+    AddCorner(MainArea, 10)
 
-    --==================================================
-    -- Sidebar
-    --==================================================
+    --//==================================================
+    --// Sidebar
+    --//==================================================
 
     local Sidebar = Create("Frame", {
         Name = "Sidebar",
         Position = UDim2.fromOffset(8, 8),
-        Size = UDim2.new(0, 145, 1, -16),
+        Size = UDim2.new(0, 135, 1, -16),
         BackgroundColor3 = Color3.fromRGB(20, 20, 25),
         BorderSizePixel = 0
     }, MainArea)
 
-    Corner(Sidebar, 8)
+    AddCorner(Sidebar, 8)
 
-    --==================================================
-    -- Tab List
-    --==================================================
+    --//==================================================
+    --// Tab List
+    --//==================================================
 
     local TabList = Create("ScrollingFrame", {
         Name = "TabList",
@@ -187,26 +203,28 @@ function WALLXP:CreateWindow(Settings)
     }, TabList)
 
     TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+
         TabList.CanvasSize = UDim2.fromOffset(
             0,
             TabLayout.AbsoluteContentSize.Y + 10
         )
+
     end)
 
-    --==================================================
-    -- Page Container
-    --==================================================
+    --//==================================================
+    --// Page Container
+    --//==================================================
 
     local PageContainer = Create("Frame", {
         Name = "Pages",
-        Position = UDim2.fromOffset(161, 8),
-        Size = UDim2.new(1, -169, 1, -16),
+        Position = UDim2.fromOffset(151, 8),
+        Size = UDim2.new(1, -159, 1, -16),
         BackgroundTransparency = 1
     }, MainArea)
 
-    --==================================================
-    -- Window Object
-    --==================================================
+    --//==================================================
+    --// Window Object
+    --//==================================================
 
     local WindowObject = {}
 
@@ -214,40 +232,39 @@ function WALLXP:CreateWindow(Settings)
     WindowObject.MainArea = MainArea
     WindowObject.Sidebar = Sidebar
     WindowObject.Pages = PageContainer
-
     WindowObject.Tabs = {}
     WindowObject.CurrentTab = nil
 
-    --==================================================
-    -- Create Tab
-    --==================================================
+    --//==================================================
+    --// Create Tab
+    --//==================================================
 
     function WindowObject:CreateTab(Name)
 
         Name = Name or "Tab"
 
-        -- Tab Button
+        --// Tab Button
 
         local TabButton = Create("TextButton", {
             Name = Name .. "_Button",
-            Size = UDim2.new(1, 0, 0, 38),
+            Size = UDim2.new(1, 0, 0, 36),
             BackgroundColor3 = Color3.fromRGB(27, 27, 33),
             BorderSizePixel = 0,
             Text = Name,
             TextColor3 = Color3.fromRGB(170, 170, 175),
-            TextSize = 13,
+            TextSize = 12,
             Font = Enum.Font.GothamMedium,
             TextXAlignment = Enum.TextXAlignment.Left,
             AutoButtonColor = false
         }, TabList)
 
-        Corner(TabButton, 7)
+        AddCorner(TabButton, 7)
 
-        local Padding = Create("UIPadding", {
+        Create("UIPadding", {
             PaddingLeft = UDim.new(0, 12)
         }, TabButton)
 
-        -- Page
+        --// Page
 
         local Page = Create("ScrollingFrame", {
             Name = Name .. "_Page",
@@ -260,7 +277,7 @@ function WALLXP:CreateWindow(Settings)
         }, PageContainer)
 
         local PageLayout = Create("UIListLayout", {
-            Padding = UDim.new(0, 8),
+            Padding = UDim.new(0, 7),
             SortOrder = Enum.SortOrder.LayoutOrder
         }, Page)
 
@@ -273,9 +290,9 @@ function WALLXP:CreateWindow(Settings)
 
         end)
 
-        --==================================================
-        -- Tab Object
-        --==================================================
+        --//==================================================
+        --// Tab Object
+        --//==================================================
 
         local Tab = {}
 
@@ -283,21 +300,21 @@ function WALLXP:CreateWindow(Settings)
         Tab.Button = TabButton
         Tab.Page = Page
 
-        --==================================================
-        -- Select Tab
-        --==================================================
+        --//==================================================
+        --// Select Tab
+        --//==================================================
 
         function Tab:Select()
 
-            local Previous = WindowObject.CurrentTab
+            if WindowObject.CurrentTab then
 
-            if Previous then
+                local Previous = WindowObject.CurrentTab
 
                 Previous.Page.Visible = false
 
-                TweenService:Create(
+                Tween(
                     Previous.Button,
-                    TweenInfo.new(0.15),
+                    0.15,
                     {
                         BackgroundColor3 = Color3.fromRGB(27, 27, 33),
                         TextColor3 = Color3.fromRGB(170, 170, 175)
@@ -310,9 +327,9 @@ function WALLXP:CreateWindow(Settings)
 
             Page.Visible = true
 
-            TweenService:Create(
+            Tween(
                 TabButton,
-                TweenInfo.new(0.15),
+                0.15,
                 {
                     BackgroundColor3 = Color3.fromRGB(45, 45, 55),
                     TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -325,20 +342,242 @@ function WALLXP:CreateWindow(Settings)
             Tab:Select()
         end)
 
+        --//==================================================
+        --// Create Section
+        --//==================================================
+
+        function Tab:CreateSection(Name)
+
+            local Section = Create("TextLabel", {
+                Name = "Section",
+                Size = UDim2.new(1, -6, 0, 24),
+                BackgroundTransparency = 1,
+                Text = Name or "Section",
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 14,
+                Font = Enum.Font.GothamBold,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, Page)
+
+            return Section
+        end
+
+        --//==================================================
+        --// Create Button
+        --//==================================================
+
+        function Tab:CreateButton(Settings)
+
+            Settings = Settings or {}
+
+            local Button = Create("TextButton", {
+                Name = "Button",
+                Size = UDim2.new(1, -6, 0, 40),
+                BackgroundColor3 = Color3.fromRGB(30, 30, 36),
+                BorderSizePixel = 0,
+                Text = Settings.Name or "Button",
+                TextColor3 = Color3.fromRGB(235, 235, 235),
+                TextSize = 13,
+                Font = Enum.Font.GothamMedium,
+                AutoButtonColor = false
+            }, Page)
+
+            AddCorner(Button, 8)
+
+            Button.MouseButton1Click:Connect(function()
+
+                Tween(
+                    Button,
+                    0.08,
+                    {
+                        BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+                    }
+                ):Play()
+
+                task.delay(0.08, function()
+
+                    if Button.Parent then
+
+                        Tween(
+                            Button,
+                            0.12,
+                            {
+                                BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+                            }
+                        ):Play()
+
+                    end
+
+                end)
+
+                if Settings.Callback then
+                    task.spawn(Settings.Callback)
+                end
+
+            end)
+
+            return Button
+        end
+
+        --//==================================================
+        --// Create Toggle
+        --//==================================================
+
+        function Tab:CreateToggle(Settings)
+
+            Settings = Settings or {}
+
+            local State = Settings.Default == true
+
+            local Toggle = Create("TextButton", {
+                Name = "Toggle",
+                Size = UDim2.new(1, -6, 0, 46),
+                BackgroundColor3 = Color3.fromRGB(30, 30, 36),
+                BorderSizePixel = 0,
+                Text = "",
+                AutoButtonColor = false
+            }, Page)
+
+            AddCorner(Toggle, 8)
+
+            --// Toggle Text
+
+            Create("TextLabel", {
+                Position = UDim2.fromOffset(14, 0),
+                Size = UDim2.new(1, -75, 1, 0),
+                BackgroundTransparency = 1,
+                Text = Settings.Name or "Toggle",
+                TextColor3 = Color3.fromRGB(235, 235, 235),
+                TextSize = 13,
+                Font = Enum.Font.GothamMedium,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, Toggle)
+
+            --// Switch
+
+            local Switch = Create("Frame", {
+                AnchorPoint = Vector2.new(1, 0.5),
+                Position = UDim2.new(1, -14, 0.5, 0),
+                Size = UDim2.fromOffset(42, 22),
+                BackgroundColor3 = Color3.fromRGB(55, 55, 62),
+                BorderSizePixel = 0
+            }, Toggle)
+
+            AddCorner(Switch, 11)
+
+            --// Circle
+
+            local Circle = Create("Frame", {
+                AnchorPoint = Vector2.new(0, 0.5),
+                Position = UDim2.new(0, 3, 0.5, 0),
+                Size = UDim2.fromOffset(16, 16),
+                BackgroundColor3 = Color3.fromRGB(220, 220, 220),
+                BorderSizePixel = 0
+            }, Switch)
+
+            AddCorner(Circle, 8)
+
+            --// Update
+
+            local function Update()
+
+                if State then
+
+                    Tween(
+                        Switch,
+                        0.15,
+                        {
+                            BackgroundColor3 = Color3.fromRGB(70, 130, 255)
+                        }
+                    ):Play()
+
+                    Tween(
+                        Circle,
+                        0.15,
+                        {
+                            Position = UDim2.new(1, -19, 0.5, 0)
+                        }
+                    ):Play()
+
+                else
+
+                    Tween(
+                        Switch,
+                        0.15,
+                        {
+                            BackgroundColor3 = Color3.fromRGB(55, 55, 62)
+                        }
+                    ):Play()
+
+                    Tween(
+                        Circle,
+                        0.15,
+                        {
+                            Position = UDim2.new(0, 3, 0.5, 0)
+                        }
+                    ):Play()
+
+                end
+
+                if Settings.Callback then
+                    task.spawn(Settings.Callback, State)
+                end
+
+            end
+
+            Toggle.MouseButton1Click:Connect(function()
+
+                State = not State
+
+                Update()
+
+            end)
+
+            --// Initial State
+            Update()
+
+            --// Toggle Object
+
+            local ToggleObject = {}
+
+            function ToggleObject:Set(Value)
+
+                State = Value == true
+
+                Update()
+
+            end
+
+            function ToggleObject:Get()
+
+                return State
+
+            end
+
+            ToggleObject.Instance = Toggle
+
+            return ToggleObject
+        end
+
+        --//==================================================
+        --// Add Tab
+        --//==================================================
+
         table.insert(WindowObject.Tabs, Tab)
 
-        -- First tab automatically selected
+        --// First Tab
 
         if #WindowObject.Tabs == 1 then
             Tab:Select()
         end
 
         return Tab
+
     end
 
-    --==================================================
-    -- Drag System
-    --==================================================
+    --//==================================================
+    --// Drag System
+    --//==================================================
 
     local Dragging = false
     local DragStart
@@ -388,7 +627,16 @@ function WALLXP:CreateWindow(Settings)
 
     end)
 
+    --//==================================================
+    --// Return Window
+    --//==================================================
+
     return WindowObject
+
 end
+
+--//==================================================
+--// Return Library
+--//==================================================
 
 return WALLXP
