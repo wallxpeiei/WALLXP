@@ -1,39 +1,33 @@
 --//==================================================
 --// WALLXP UI LIBRARY
---// Version 1.2
+--// Version 1.3
 --// Window + Tabs + Section + Button + Toggle
+--// Slider + Dropdown
 --//==================================================
 
 local WALLXP = {}
 WALLXP.__index = WALLXP
 
---// Services
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local Player = Players.LocalPlayer
 
---//==================================================
---// GUI
---//==================================================
+--==================================================
+-- GUI
+--==================================================
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WALLXP_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local success = pcall(function()
-    ScreenGui.Parent = game:GetService("CoreGui")
-end)
+ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 
-if not success or not ScreenGui.Parent then
-    ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-end
-
---//==================================================
---// Utility
---//==================================================
+--==================================================
+-- Utility
+--==================================================
 
 local function Create(ClassName, Properties, Parent)
 
@@ -71,9 +65,9 @@ local function Tween(Object, Time, Properties)
 
 end
 
---//==================================================
---// Create Window
---//==================================================
+--==================================================
+-- Create Window
+--==================================================
 
 function WALLXP:CreateWindow(Settings)
 
@@ -82,7 +76,6 @@ function WALLXP:CreateWindow(Settings)
     local WindowName = Settings.Name or "WALLXP"
     local WindowSubtitle = Settings.Subtitle or "Custom UI Library"
 
-    --// Window
     local Window = Create("Frame", {
         Name = "Window",
         Size = UDim2.fromOffset(600, 330),
@@ -93,17 +86,15 @@ function WALLXP:CreateWindow(Settings)
 
     AddCorner(Window, 12)
 
-    --//==================================================
-    --// Top Bar
-    --//==================================================
+    --==================================================
+    -- Top Bar
+    --==================================================
 
     local TopBar = Create("Frame", {
         Name = "TopBar",
         Size = UDim2.new(1, 0, 0, 58),
         BackgroundTransparency = 1
     }, Window)
-
-    --// Title
 
     Create("TextLabel", {
         Name = "Title",
@@ -117,8 +108,6 @@ function WALLXP:CreateWindow(Settings)
         TextXAlignment = Enum.TextXAlignment.Left
     }, TopBar)
 
-    --// Subtitle
-
     Create("TextLabel", {
         Name = "Subtitle",
         Position = UDim2.fromOffset(21, 33),
@@ -131,9 +120,9 @@ function WALLXP:CreateWindow(Settings)
         TextXAlignment = Enum.TextXAlignment.Left
     }, TopBar)
 
-    --//==================================================
-    --// Close Button
-    --//==================================================
+    --==================================================
+    -- Close
+    --==================================================
 
     local Close = Create("TextButton", {
         Name = "Close",
@@ -155,9 +144,9 @@ function WALLXP:CreateWindow(Settings)
         ScreenGui:Destroy()
     end)
 
-    --//==================================================
-    --// Main Area
-    --//==================================================
+    --==================================================
+    -- Main Area
+    --==================================================
 
     local MainArea = Create("Frame", {
         Name = "MainArea",
@@ -169,9 +158,9 @@ function WALLXP:CreateWindow(Settings)
 
     AddCorner(MainArea, 10)
 
-    --//==================================================
-    --// Sidebar
-    --//==================================================
+    --==================================================
+    -- Sidebar
+    --==================================================
 
     local Sidebar = Create("Frame", {
         Name = "Sidebar",
@@ -182,10 +171,6 @@ function WALLXP:CreateWindow(Settings)
     }, MainArea)
 
     AddCorner(Sidebar, 8)
-
-    --//==================================================
-    --// Tab List
-    --//==================================================
 
     local TabList = Create("ScrollingFrame", {
         Name = "TabList",
@@ -211,9 +196,9 @@ function WALLXP:CreateWindow(Settings)
 
     end)
 
-    --//==================================================
-    --// Page Container
-    --//==================================================
+    --==================================================
+    -- Pages
+    --==================================================
 
     local PageContainer = Create("Frame", {
         Name = "Pages",
@@ -222,9 +207,9 @@ function WALLXP:CreateWindow(Settings)
         BackgroundTransparency = 1
     }, MainArea)
 
-    --//==================================================
-    --// Window Object
-    --//==================================================
+    --==================================================
+    -- Window Object
+    --==================================================
 
     local WindowObject = {}
 
@@ -235,15 +220,13 @@ function WALLXP:CreateWindow(Settings)
     WindowObject.Tabs = {}
     WindowObject.CurrentTab = nil
 
-    --//==================================================
-    --// Create Tab
-    --//==================================================
+    --==================================================
+    -- Create Tab
+    --==================================================
 
     function WindowObject:CreateTab(Name)
 
         Name = Name or "Tab"
-
-        --// Tab Button
 
         local TabButton = Create("TextButton", {
             Name = Name .. "_Button",
@@ -263,8 +246,6 @@ function WALLXP:CreateWindow(Settings)
         Create("UIPadding", {
             PaddingLeft = UDim.new(0, 12)
         }, TabButton)
-
-        --// Page
 
         local Page = Create("ScrollingFrame", {
             Name = Name .. "_Page",
@@ -290,19 +271,15 @@ function WALLXP:CreateWindow(Settings)
 
         end)
 
-        --//==================================================
-        --// Tab Object
-        --//==================================================
-
         local Tab = {}
 
         Tab.Name = Name
         Tab.Button = TabButton
         Tab.Page = Page
 
-        --//==================================================
-        --// Select Tab
-        --//==================================================
+        --==================================================
+        -- Select Tab
+        --==================================================
 
         function Tab:Select()
 
@@ -342,9 +319,9 @@ function WALLXP:CreateWindow(Settings)
             Tab:Select()
         end)
 
-        --//==================================================
-        --// Create Section
-        --//==================================================
+        --==================================================
+        -- Section
+        --==================================================
 
         function Tab:CreateSection(Name)
 
@@ -362,9 +339,9 @@ function WALLXP:CreateWindow(Settings)
             return Section
         end
 
-        --//==================================================
-        --// Create Button
-        --//==================================================
+        --==================================================
+        -- Button
+        --==================================================
 
         function Tab:CreateButton(Settings)
 
@@ -419,9 +396,9 @@ function WALLXP:CreateWindow(Settings)
             return Button
         end
 
-        --//==================================================
-        --// Create Toggle
-        --//==================================================
+        --==================================================
+        -- Toggle
+        --==================================================
 
         function Tab:CreateToggle(Settings)
 
@@ -440,8 +417,6 @@ function WALLXP:CreateWindow(Settings)
 
             AddCorner(Toggle, 8)
 
-            --// Toggle Text
-
             Create("TextLabel", {
                 Position = UDim2.fromOffset(14, 0),
                 Size = UDim2.new(1, -75, 1, 0),
@@ -453,8 +428,6 @@ function WALLXP:CreateWindow(Settings)
                 TextXAlignment = Enum.TextXAlignment.Left
             }, Toggle)
 
-            --// Switch
-
             local Switch = Create("Frame", {
                 AnchorPoint = Vector2.new(1, 0.5),
                 Position = UDim2.new(1, -14, 0.5, 0),
@@ -465,8 +438,6 @@ function WALLXP:CreateWindow(Settings)
 
             AddCorner(Switch, 11)
 
-            --// Circle
-
             local Circle = Create("Frame", {
                 AnchorPoint = Vector2.new(0, 0.5),
                 Position = UDim2.new(0, 3, 0.5, 0),
@@ -476,8 +447,6 @@ function WALLXP:CreateWindow(Settings)
             }, Switch)
 
             AddCorner(Circle, 8)
-
-            --// Update
 
             local function Update()
 
@@ -533,17 +502,13 @@ function WALLXP:CreateWindow(Settings)
 
             end)
 
-            --// Initial State
             Update()
-
-            --// Toggle Object
 
             local ToggleObject = {}
 
             function ToggleObject:Set(Value)
 
                 State = Value == true
-
                 Update()
 
             end
@@ -559,13 +524,404 @@ function WALLXP:CreateWindow(Settings)
             return ToggleObject
         end
 
-        --//==================================================
-        --// Add Tab
-        --//==================================================
+        --==================================================
+        -- Slider
+        --==================================================
+
+        function Tab:CreateSlider(Settings)
+
+            Settings = Settings or {}
+
+            local Range = Settings.Range or {0, 100}
+            local Minimum = Range[1]
+            local Maximum = Range[2]
+
+            local Increment = Settings.Increment or 1
+            local CurrentValue = Settings.CurrentValue or Minimum
+
+            CurrentValue = math.clamp(
+                CurrentValue,
+                Minimum,
+                Maximum
+            )
+
+            local Slider = Create("Frame", {
+                Name = "Slider",
+                Size = UDim2.new(1, -6, 0, 58),
+                BackgroundColor3 = Color3.fromRGB(30, 30, 36),
+                BorderSizePixel = 0
+            }, Page)
+
+            AddCorner(Slider, 8)
+
+            Create("TextLabel", {
+                Position = UDim2.fromOffset(14, 7),
+                Size = UDim2.new(1, -80, 0, 20),
+                BackgroundTransparency = 1,
+                Text = Settings.Name or "Slider",
+                TextColor3 = Color3.fromRGB(235, 235, 235),
+                TextSize = 13,
+                Font = Enum.Font.GothamMedium,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, Slider)
+
+            local ValueLabel = Create("TextLabel", {
+                AnchorPoint = Vector2.new(1, 0),
+                Position = UDim2.new(1, -14, 7, 0),
+                Size = UDim2.fromOffset(55, 20),
+                BackgroundTransparency = 1,
+                Text = tostring(CurrentValue),
+                TextColor3 = Color3.fromRGB(150, 170, 255),
+                TextSize = 12,
+                Font = Enum.Font.GothamMedium,
+                TextXAlignment = Enum.TextXAlignment.Right
+            }, Slider)
+
+            local Bar = Create("Frame", {
+                Position = UDim2.new(0, 14, 0, 36),
+                Size = UDim2.new(1, -28, 0, 6),
+                BackgroundColor3 = Color3.fromRGB(55, 55, 62),
+                BorderSizePixel = 0
+            }, Slider)
+
+            AddCorner(Bar, 4)
+
+            local Fill = Create("Frame", {
+                Size = UDim2.new(
+                    (CurrentValue - Minimum) /
+                    (Maximum - Minimum),
+                    0,
+                    1,
+                    0
+                ),
+                BackgroundColor3 = Color3.fromRGB(70, 130, 255),
+                BorderSizePixel = 0
+            }, Bar)
+
+            AddCorner(Fill, 4)
+
+            local Hitbox = Create("TextButton", {
+                Position = UDim2.fromOffset(0, -10),
+                Size = UDim2.new(1, 0, 1, 20),
+                BackgroundTransparency = 1,
+                Text = ""
+            }, Bar)
+
+            local Dragging = false
+
+            local function SetValue(Value)
+
+                Value = math.clamp(Value, Minimum, Maximum)
+
+                Value = math.floor(
+                    ((Value - Minimum) / Increment) + 0.5
+                ) * Increment + Minimum
+
+                Value = math.clamp(Value, Minimum, Maximum)
+
+                CurrentValue = Value
+
+                local Percent =
+                    (Value - Minimum) /
+                    (Maximum - Minimum)
+
+                Tween(
+                    Fill,
+                    0.1,
+                    {
+                        Size = UDim2.new(
+                            Percent,
+                            0,
+                            1,
+                            0
+                        )
+                    }
+                ):Play()
+
+                ValueLabel.Text = tostring(Value)
+
+                if Settings.Callback then
+                    task.spawn(Settings.Callback, Value)
+                end
+
+            end
+
+            local function UpdateFromInput(Input)
+
+                local Percent = math.clamp(
+                    (Input.Position.X - Bar.AbsolutePosition.X) /
+                    Bar.AbsoluteSize.X,
+                    0,
+                    1
+                )
+
+                local Value =
+                    Minimum +
+                    ((Maximum - Minimum) * Percent)
+
+                SetValue(Value)
+
+            end
+
+            Hitbox.InputBegan:Connect(function(Input)
+
+                if Input.UserInputType == Enum.UserInputType.MouseButton1
+                or Input.UserInputType == Enum.UserInputType.Touch then
+
+                    Dragging = true
+
+                    UpdateFromInput(Input)
+
+                end
+
+            end)
+
+            UserInputService.InputChanged:Connect(function(Input)
+
+                if not Dragging then
+                    return
+                end
+
+                if Input.UserInputType == Enum.UserInputType.MouseMovement
+                or Input.UserInputType == Enum.UserInputType.Touch then
+
+                    UpdateFromInput(Input)
+
+                end
+
+            end)
+
+            UserInputService.InputEnded:Connect(function(Input)
+
+                if Input.UserInputType == Enum.UserInputType.MouseButton1
+                or Input.UserInputType == Enum.UserInputType.Touch then
+
+                    Dragging = false
+
+                end
+
+            end)
+
+            local SliderObject = {}
+
+            function SliderObject:Set(Value)
+                SetValue(Value)
+            end
+
+            function SliderObject:Get()
+                return CurrentValue
+            end
+
+            SliderObject.Instance = Slider
+
+            return SliderObject
+        end
+
+        --==================================================
+        -- Dropdown
+        --==================================================
+
+        function Tab:CreateDropdown(Settings)
+
+            Settings = Settings or {}
+
+            local Options = Settings.Options or {}
+            local CurrentOption =
+                Settings.CurrentOption or Options[1]
+
+            local Opened = false
+
+            local Dropdown = Create("Frame", {
+                Name = "Dropdown",
+                Size = UDim2.new(1, -6, 0, 42),
+                BackgroundColor3 = Color3.fromRGB(30, 30, 36),
+                BorderSizePixel = 0,
+                ClipsDescendants = true
+            }, Page)
+
+            AddCorner(Dropdown, 8)
+
+            local SelectButton = Create("TextButton", {
+                Size = UDim2.new(1, 0, 0, 42),
+                BackgroundTransparency = 1,
+                Text = "",
+                AutoButtonColor = false
+            }, Dropdown)
+
+            Create("TextLabel", {
+                Position = UDim2.fromOffset(14, 0),
+                Size = UDim2.new(0.55, 0, 0, 42),
+                BackgroundTransparency = 1,
+                Text = Settings.Name or "Dropdown",
+                TextColor3 = Color3.fromRGB(235, 235, 235),
+                TextSize = 13,
+                Font = Enum.Font.GothamMedium,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, SelectButton)
+
+            local SelectedLabel = Create("TextLabel", {
+                AnchorPoint = Vector2.new(1, 0),
+                Position = UDim2.new(1, -30, 0, 0),
+                Size = UDim2.new(0.35, 0, 0, 42),
+                BackgroundTransparency = 1,
+                Text = tostring(CurrentOption or "None"),
+                TextColor3 = Color3.fromRGB(150, 170, 255),
+                TextSize = 12,
+                Font = Enum.Font.Gotham,
+                TextXAlignment = Enum.TextXAlignment.Right
+            }, SelectButton)
+
+            local Arrow = Create("TextLabel", {
+                AnchorPoint = Vector2.new(1, 0),
+                Position = UDim2.new(1, -12, 0, 0),
+                Size = UDim2.fromOffset(15, 42),
+                BackgroundTransparency = 1,
+                Text = "⌄",
+                TextColor3 = Color3.fromRGB(180, 180, 185),
+                TextSize = 14,
+                Font = Enum.Font.GothamBold
+            }, SelectButton)
+
+            local OptionList = Create("Frame", {
+                Position = UDim2.fromOffset(8, 45),
+                Size = UDim2.new(1, -16, 0, 0),
+                BackgroundTransparency = 1
+            }, Dropdown)
+
+            local OptionLayout = Create("UIListLayout", {
+                Padding = UDim.new(0, 4),
+                SortOrder = Enum.SortOrder.LayoutOrder
+            }, OptionList)
+
+            local function SelectOption(Option)
+
+                CurrentOption = Option
+
+                SelectedLabel.Text = tostring(Option)
+
+                if Settings.Callback then
+                    task.spawn(Settings.Callback, Option)
+                end
+
+            end
+
+            for _, Option in ipairs(Options) do
+
+                local OptionButton = Create("TextButton", {
+                    Size = UDim2.new(1, 0, 0, 32),
+                    BackgroundColor3 = Color3.fromRGB(38, 38, 45),
+                    BorderSizePixel = 0,
+                    Text = tostring(Option),
+                    TextColor3 = Color3.fromRGB(220, 220, 225),
+                    TextSize = 12,
+                    Font = Enum.Font.Gotham,
+                    AutoButtonColor = false
+                }, OptionList)
+
+                AddCorner(OptionButton, 6)
+
+                OptionButton.MouseButton1Click:Connect(function()
+
+                    SelectOption(Option)
+
+                    Opened = false
+
+                    local Height = 42
+
+                    Tween(
+                        Dropdown,
+                        0.15,
+                        {
+                            Size = UDim2.new(1, -6, 0, Height)
+                        }
+                    ):Play()
+
+                    Arrow.Text = "⌄"
+
+                end)
+
+            end
+
+            SelectButton.MouseButton1Click:Connect(function()
+
+                Opened = not Opened
+
+                if Opened then
+
+                    local Height =
+                        50 +
+                        (#Options * 36)
+
+                    Tween(
+                        Dropdown,
+                        0.2,
+                        {
+                            Size = UDim2.new(
+                                1,
+                                -6,
+                                0,
+                                Height
+                            )
+                        }
+                    ):Play()
+
+                    Arrow.Text = "⌃"
+
+                else
+
+                    Tween(
+                        Dropdown,
+                        0.2,
+                        {
+                            Size = UDim2.new(
+                                1,
+                                -6,
+                                0,
+                                42
+                            )
+                        }
+                    ):Play()
+
+                    Arrow.Text = "⌄"
+
+                end
+
+            end)
+
+            local DropdownObject = {}
+
+            function DropdownObject:Set(Option)
+
+                for _, Value in ipairs(Options) do
+
+                    if Value == Option then
+
+                        SelectOption(Option)
+
+                        return
+
+                    end
+
+                end
+
+            end
+
+            function DropdownObject:Get()
+
+                return CurrentOption
+
+            end
+
+            DropdownObject.Instance = Dropdown
+
+            return DropdownObject
+        end
+
+        --==================================================
+        -- Store Tab
+        --==================================================
 
         table.insert(WindowObject.Tabs, Tab)
-
-        --// First Tab
 
         if #WindowObject.Tabs == 1 then
             Tab:Select()
@@ -575,9 +931,9 @@ function WALLXP:CreateWindow(Settings)
 
     end
 
-    --//==================================================
-    --// Drag System
-    --//==================================================
+    --==================================================
+    -- Drag Window
+    --==================================================
 
     local Dragging = false
     local DragStart
@@ -627,16 +983,7 @@ function WALLXP:CreateWindow(Settings)
 
     end)
 
-    --//==================================================
-    --// Return Window
-    --//==================================================
-
     return WindowObject
-
 end
-
---//==================================================
---// Return Library
---//==================================================
 
 return WALLXP
