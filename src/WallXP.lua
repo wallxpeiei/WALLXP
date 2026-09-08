@@ -1,6 +1,6 @@
 --[[
     WallXP UI Library
-    Version: 0.4.0
+    Version: 0.5.3
     UI-only / executor-agnostic
 ]]
 
@@ -43,7 +43,7 @@ local function Stroke(obj, color, thickness)
         Parent = obj,
         Color = color or WallXP.Theme.Stroke,
         Thickness = thickness or 1,
-        Transparency = 0.38
+        Transparency = 0.50
     })
 end
 
