@@ -7,13 +7,16 @@
 local WallXP = {}
 WallXP.__index = WallXP
 
-WallXP.Version = "0.4.0"
+WallXP.Version = "0.5.0 Liquid Glass"
 
 WallXP.Theme = {
-    Background = Color3.fromRGB(18, 18, 22),
-    Secondary = Color3.fromRGB(25, 25, 30),
-    Element = Color3.fromRGB(31, 31, 38),
-    Accent = Color3.fromRGB(100, 120, 255),
+    Background = Color3.fromRGB(20, 20, 27),
+    Glass = Color3.fromRGB(255, 255, 255),
+    GlassTransparency = 0.84,
+    GlassHighlight = Color3.fromRGB(255, 255, 255),
+    Secondary = Color3.fromRGB(255, 255, 255),
+    Element = Color3.fromRGB(255, 255, 255),
+    Accent = Color3.fromRGB(105, 125, 255),
     AccentDark = Color3.fromRGB(76, 92, 210),
     Text = Color3.fromRGB(245, 245, 250),
     SubText = Color3.fromRGB(165, 165, 175),
@@ -42,6 +45,26 @@ local function Stroke(obj, color, thickness)
         Thickness = thickness or 1,
         Transparency = 0.15
     })
+end
+
+local function Glassify(obj, transparency)
+    obj.BackgroundTransparency = transparency or WallXP.Theme.GlassTransparency
+    local gradient = New("UIGradient", {
+        Parent = obj,
+        Rotation = 115,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(0.48, Color3.fromRGB(225, 230, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+        }),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.72),
+            NumberSequenceKeypoint.new(0.5, 0.88),
+            NumberSequenceKeypoint.new(1, 0.76)
+        })
+    })
+    Stroke(obj, WallXP.Theme.GlassHighlight, 1)
+    return gradient
 end
 
 local function Tween(obj, info, props)
@@ -82,8 +105,8 @@ function WallXP:CreateWindow(options)
         BackgroundColor3 = self.Theme.Background,
         BorderSizePixel = 0
     })
-    Corner(WindowFrame, 14)
-    Stroke(WindowFrame)
+    Corner(WindowFrame, 22)
+    Glassify(WindowFrame, 0.18)
 
     local Topbar = New("Frame", {
         Parent = WindowFrame,
@@ -103,6 +126,17 @@ function WallXP:CreateWindow(options)
         TextXAlignment = Enum.TextXAlignment.Left
     })
 
+    local Highlight = New("Frame", {
+        Parent = WindowFrame,
+        Position = UDim2.fromOffset(1, 1),
+        Size = UDim2.new(1, -2, 0, 2),
+        BackgroundColor3 = WallXP.Theme.GlassHighlight,
+        BackgroundTransparency = 0.72,
+        BorderSizePixel = 0,
+        ZIndex = 3
+    })
+    Corner(Highlight, 2)
+
     local Minimize = New("TextButton", {
         Parent = Topbar,
         Size = UDim2.fromOffset(54, 54),
@@ -115,7 +149,8 @@ function WallXP:CreateWindow(options)
         TextSize = 24,
         AutoButtonColor = false
     })
-    Corner(Minimize, 12)
+    Corner(Minimize, 16)
+    Glassify(Minimize, 0.72)
 
     local Close = New("TextButton", {
         Parent = Topbar,
@@ -129,7 +164,8 @@ function WallXP:CreateWindow(options)
         TextSize = 25,
         AutoButtonColor = false
     })
-    Corner(Close, 12)
+    Corner(Close, 16)
+    Glassify(Close, 0.72)
 
     local Side = New("Frame", {
         Parent = WindowFrame,
@@ -138,7 +174,8 @@ function WallXP:CreateWindow(options)
         BackgroundColor3 = self.Theme.Secondary,
         BorderSizePixel = 0
     })
-    Corner(Side, 12)
+    Corner(Side, 18)
+    Glassify(Side, 0.78)
 
     local Pages = New("Frame", {
         Parent = WindowFrame,
@@ -291,7 +328,8 @@ function WallXP:CreateWindow(options)
                 BackgroundColor3 = WallXP.Theme.Secondary,
                 BorderSizePixel = 0
             })
-            Corner(section, 12)
+            Corner(section, 18)
+            Glassify(section, 0.78)
 
             local sectionTitle = New("TextLabel", {
                 Parent = section,
@@ -355,7 +393,8 @@ function WallXP:CreateWindow(options)
                     TextSize = 15,
                     AutoButtonColor = false
                 })
-                Corner(button, 9)
+                Corner(button, 12)
+                Glassify(button, 0.72)
 
                 button.MouseEnter:Connect(function()
                     Tween(button, TweenInfo.new(0.15), {BackgroundColor3 = WallXP.Theme.AccentDark})
@@ -386,7 +425,8 @@ function WallXP:CreateWindow(options)
                     Text = "",
                     AutoButtonColor = false
                 })
-                Corner(button, 9)
+                Corner(button, 12)
+                Glassify(button, 0.72)
 
                 local text = New("TextLabel", {
                     Parent = button,
@@ -452,7 +492,8 @@ function WallXP:CreateWindow(options)
                     BackgroundColor3 = WallXP.Theme.Element,
                     BorderSizePixel = 0
                 })
-                Corner(holder, 9)
+                Corner(holder, 12)
+                Glassify(holder, 0.72)
 
                 local name = New("TextLabel", {
                     Parent = holder,
@@ -566,7 +607,8 @@ function WallXP:CreateWindow(options)
                     BorderSizePixel = 0,
                     ClipsDescendants = false
                 })
-                Corner(holder, 9)
+                Corner(holder, 12)
+                Glassify(holder, 0.72)
 
                 local button = New("TextButton", {
                     Parent = holder,
@@ -658,7 +700,8 @@ function WallXP:CreateWindow(options)
                     TextSize = 15,
                     ClearTextOnFocus = false
                 })
-                Corner(box, 9)
+                Corner(box, 12)
+                Glassify(box, 0.72)
 
                 New("UIPadding", {
                     Parent = box,
@@ -720,8 +763,8 @@ function WallXP:Notify(options)
         BackgroundColor3 = self.Theme.Secondary,
         BorderSizePixel = 0
     })
-    Corner(frame, 12)
-    Stroke(frame)
+    Corner(frame, 18)
+    Glassify(frame, 0.20)
 
     New("TextLabel", {
         Parent = frame,
