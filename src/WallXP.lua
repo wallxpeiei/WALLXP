@@ -1,18 +1,18 @@
 --[[
     WallXP UI Library
-    Version: 0.5.1
+    Version: 0.4.0
     UI-only / executor-agnostic
 ]]
 
 local WallXP = {}
 WallXP.__index = WallXP
 
-WallXP.Version = "0.5.1 Liquid Glass"
+WallXP.Version = "0.5.3 Liquid Glass Opaque"
 
 WallXP.Theme = {
     Background = Color3.fromRGB(20, 20, 27),
     Glass = Color3.fromRGB(245, 248, 255),
-    GlassTransparency = 0.38,
+    GlassTransparency = 0.12,
     GlassHighlight = Color3.fromRGB(255, 255, 255),
     Secondary = Color3.fromRGB(255, 255, 255),
     Element = Color3.fromRGB(255, 255, 255),
@@ -43,7 +43,7 @@ local function Stroke(obj, color, thickness)
         Parent = obj,
         Color = color or WallXP.Theme.Stroke,
         Thickness = thickness or 1,
-        Transparency = 0.15
+        Transparency = 0.38
     })
 end
 
@@ -100,11 +100,11 @@ function WallXP:CreateWindow(options)
         Parent = gui,
         Size = windowSize,
         Position = UDim2.new(0.5, -windowSize.X.Offset / 2, 0.5, -windowSize.Y.Offset / 2),
-        BackgroundColor3 = self.Theme.Background,
+        BackgroundColor3 = Color3.fromRGB(16, 17, 22),
         BorderSizePixel = 0
     })
     Corner(WindowFrame, 22)
-    Glassify(WindowFrame, 0.10)
+    Glassify(WindowFrame, 0.04)
     Stroke(WindowFrame, WallXP.Theme.GlassHighlight, 1)
 
     local Topbar = New("Frame", {
@@ -174,7 +174,7 @@ function WallXP:CreateWindow(options)
         BorderSizePixel = 0
     })
     Corner(Side, 18)
-    Glassify(Side, 0.48)
+    Glassify(Side, 0.14)
     Stroke(Side, WallXP.Theme.GlassHighlight, 1)
 
     local Pages = New("Frame", {
@@ -311,12 +311,12 @@ function WallXP:CreateWindow(options)
             for _, other in ipairs(self.Window.Tabs) do
                 other.Page.Visible = false
                 other.Button.BackgroundColor3 = WallXP.Theme.Glass
-                other.Button.BackgroundTransparency = 0.58
+                other.Button.BackgroundTransparency = 0.62
             end
 
             page.Visible = true
             tabButton.BackgroundColor3 = WallXP.Theme.Accent
-            tabButton.BackgroundTransparency = 0.18
+            tabButton.BackgroundTransparency = 0.12
             self.Window.CurrentTab = self
         end
 
@@ -331,7 +331,7 @@ function WallXP:CreateWindow(options)
                 BorderSizePixel = 0
             })
             Corner(section, 18)
-            Glassify(section, 0.46)
+            Glassify(section, 0.14)
             Stroke(section, WallXP.Theme.GlassHighlight, 1)
 
             local sectionTitle = New("TextLabel", {
