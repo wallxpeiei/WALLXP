@@ -7,12 +7,12 @@
 local WallXP = {}
 WallXP.__index = WallXP
 
-WallXP.Version = "0.5.3 Liquid Glass Opaque"
+WallXP.Version = "0.5.5 iOS 26 Liquid Glass"
 
 WallXP.Theme = {
     Background = Color3.fromRGB(20, 20, 27),
     Glass = Color3.fromRGB(245, 248, 255),
-    GlassTransparency = 0.12,
+    GlassTransparency = 0.18,
     GlassHighlight = Color3.fromRGB(255, 255, 255),
     Secondary = Color3.fromRGB(255, 255, 255),
     Element = Color3.fromRGB(255, 255, 255),
@@ -54,13 +54,13 @@ local function Glassify(obj, transparency)
         Rotation = 115,
         Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 225, 245)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 238, 248)),
             ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
         }),
         Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.86),
-            NumberSequenceKeypoint.new(0.5, 0.94),
-            NumberSequenceKeypoint.new(1, 0.88)
+            NumberSequenceKeypoint.new(0, 0.78),
+            NumberSequenceKeypoint.new(0.5, 0.88),
+            NumberSequenceKeypoint.new(1, 0.80)
         })
     })
 end
@@ -104,7 +104,7 @@ function WallXP:CreateWindow(options)
         BorderSizePixel = 0
     })
     Corner(WindowFrame, 22)
-    Glassify(WindowFrame, 0.04)
+    Glassify(WindowFrame, WallXP.Theme.GlassTransparency)
     Stroke(WindowFrame, WallXP.Theme.GlassHighlight, 1)
 
     local Topbar = New("Frame", {
@@ -149,7 +149,7 @@ function WallXP:CreateWindow(options)
         AutoButtonColor = false
     })
     Corner(Minimize, 16)
-    Glassify(Minimize, 0.48)
+    Glassify(Minimize, WallXP.Theme.GlassTransparency)
 
     local Close = New("TextButton", {
         Parent = Topbar,
@@ -164,7 +164,7 @@ function WallXP:CreateWindow(options)
         AutoButtonColor = false
     })
     Corner(Close, 16)
-    Glassify(Close, 0.48)
+    Glassify(Close, WallXP.Theme.GlassTransparency)
 
     local Side = New("Frame", {
         Parent = WindowFrame,
@@ -174,7 +174,7 @@ function WallXP:CreateWindow(options)
         BorderSizePixel = 0
     })
     Corner(Side, 18)
-    Glassify(Side, 0.14)
+    Glassify(Side, WallXP.Theme.GlassTransparency)
     Stroke(Side, WallXP.Theme.GlassHighlight, 1)
 
     local Pages = New("Frame", {
@@ -311,12 +311,12 @@ function WallXP:CreateWindow(options)
             for _, other in ipairs(self.Window.Tabs) do
                 other.Page.Visible = false
                 other.Button.BackgroundColor3 = WallXP.Theme.Glass
-                other.Button.BackgroundTransparency = 0.62
+                other.Button.BackgroundTransparency = WallXP.Theme.GlassTransparency
             end
 
             page.Visible = true
             tabButton.BackgroundColor3 = WallXP.Theme.Accent
-            tabButton.BackgroundTransparency = 0.12
+            tabButton.BackgroundTransparency = WallXP.Theme.GlassTransparency
             self.Window.CurrentTab = self
         end
 
@@ -331,7 +331,7 @@ function WallXP:CreateWindow(options)
                 BorderSizePixel = 0
             })
             Corner(section, 18)
-            Glassify(section, 0.14)
+            Glassify(section, WallXP.Theme.GlassTransparency)
             Stroke(section, WallXP.Theme.GlassHighlight, 1)
 
             local sectionTitle = New("TextLabel", {
@@ -397,7 +397,7 @@ function WallXP:CreateWindow(options)
                     AutoButtonColor = false
                 })
                 Corner(button, 12)
-                Glassify(button, 0.52)
+                Glassify(button, WallXP.Theme.GlassTransparency)
 
                 button.MouseEnter:Connect(function()
                     Tween(button, TweenInfo.new(0.15), {BackgroundColor3 = WallXP.Theme.AccentDark})
@@ -429,7 +429,7 @@ function WallXP:CreateWindow(options)
                     AutoButtonColor = false
                 })
                 Corner(button, 12)
-                Glassify(button, 0.52)
+                Glassify(button, WallXP.Theme.GlassTransparency)
 
                 local text = New("TextLabel", {
                     Parent = button,
@@ -496,7 +496,7 @@ function WallXP:CreateWindow(options)
                     BorderSizePixel = 0
                 })
                 Corner(holder, 12)
-                Glassify(holder, 0.52)
+                Glassify(holder, WallXP.Theme.GlassTransparency)
 
                 local name = New("TextLabel", {
                     Parent = holder,
@@ -611,7 +611,7 @@ function WallXP:CreateWindow(options)
                     ClipsDescendants = false
                 })
                 Corner(holder, 12)
-                Glassify(holder, 0.52)
+                Glassify(holder, WallXP.Theme.GlassTransparency)
 
                 local button = New("TextButton", {
                     Parent = holder,
@@ -704,7 +704,7 @@ function WallXP:CreateWindow(options)
                     ClearTextOnFocus = false
                 })
                 Corner(box, 12)
-                Glassify(box, 0.52)
+                Glassify(box, WallXP.Theme.GlassTransparency)
 
                 New("UIPadding", {
                     Parent = box,
@@ -767,7 +767,7 @@ function WallXP:Notify(options)
         BorderSizePixel = 0
     })
     Corner(frame, 18)
-    Glassify(frame, 0.20)
+    Glassify(frame, WallXP.Theme.GlassTransparency)
 
     New("TextLabel", {
         Parent = frame,
