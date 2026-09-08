@@ -1,8 +1,19 @@
 --//==================================================
 --// WALLXP UI LIBRARY
---// Version 1.3
---// Window + Tabs + Section + Button + Toggle
---// Slider + Dropdown
+--// Version 1.4
+--//
+--// Window
+--// Tabs
+--// Section
+--// Button
+--// Toggle
+--// Slider
+--// Dropdown
+--// Input
+--// Keybind
+--// Notification
+--// Minimize / Restore
+--// Mobile Touch Support
 --//==================================================
 
 local WALLXP = {}
@@ -15,7 +26,7 @@ local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 
 --==================================================
--- GUI
+-- ScreenGui
 --==================================================
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -23,7 +34,13 @@ ScreenGui.Name = "WALLXP_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+local success = pcall(function()
+    ScreenGui.Parent = game:GetService("CoreGui")
+end)
+
+if not success or not ScreenGui.Parent then
+    ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+end
 
 --==================================================
 -- Utility
@@ -51,6 +68,19 @@ local function AddCorner(Object, Radius)
     return Corner
 end
 
+local function AddStroke(Object, Color, Transparency, Thickness)
+
+    local Stroke = Instance.new("UIStroke")
+
+    Stroke.Color = Color or Color3.fromRGB(70, 130, 255)
+    Stroke.Transparency = Transparency or 0
+    Stroke.Thickness = Thickness or 1
+
+    Stroke.Parent = Object
+
+    return Stroke
+end
+
 local function Tween(Object, Time, Properties)
 
     return TweenService:Create(
@@ -66,6 +96,126 @@ local function Tween(Object, Time, Properties)
 end
 
 --==================================================
+-- Notification Holder
+--==================================================
+
+local NotificationHolder = Create("Frame", {
+    Name = "Notifications",
+    AnchorPoint = Vector2.new(1, 1),
+    Position = UDim2.new(1, -18, 1, -18),
+    Size = UDim2.fromOffset(310, 400),
+    BackgroundTransparency = 1
+}, ScreenGui)
+
+local NotificationLayout = Create("UIListLayout", {
+    Padding = UDim.new(0, 8),
+    HorizontalAlignment = Enum.HorizontalAlignment.Right,
+    VerticalAlignment = Enum.VerticalAlignment.Bottom,
+    SortOrder = Enum.SortOrder.LayoutOrder
+}, NotificationHolder)
+
+--==================================================
+-- Notification
+--==================================================
+
+function WALLXP:Notify(Settings)
+
+    Settings = Settings or {}
+
+    local Title = Settings.Title or "WALLXP"
+    local Content = Settings.Content or ""
+    local Duration = Settings.Duration or 3
+
+    local Notification = Create("Frame", {
+        Name = "Notification",
+        Size = UDim2.fromOffset(290, 72),
+        BackgroundColor3 = Color3.fromRGB(25, 25, 31),
+        BorderSizePixel = 0
+    }, NotificationHolder)
+
+    AddCorner(Notification, 10)
+
+    AddStroke(
+        Notification,
+        Color3.fromRGB(70, 130, 255),
+        0.35,
+        1
+    )
+
+    local Accent = Create("Frame", {
+        Position = UDim2.fromOffset(0, 10),
+        Size = UDim2.fromOffset(3, 52),
+        BackgroundColor3 = Color3.fromRGB(70, 130, 255),
+        BorderSizePixel = 0
+    }, Notification)
+
+    AddCorner(Accent, 2)
+
+    Create("TextLabel", {
+        Position = UDim2.fromOffset(15, 8),
+        Size = UDim2.new(1, -30, 0, 22),
+        BackgroundTransparency = 1,
+        Text = Title,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left
+    }, Notification)
+
+    Create("TextLabel", {
+        Position = UDim2.fromOffset(15, 31),
+        Size = UDim2.new(1, -30, 0, 30),
+        BackgroundTransparency = 1,
+        Text = Content,
+        TextColor3 = Color3.fromRGB(165, 165, 172),
+        TextSize = 11,
+        Font = Enum.Font.Gotham,
+        TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top
+    }, Notification)
+
+    Notification.Position = UDim2.new(1, 25, 0, 0)
+
+    Tween(
+        Notification,
+        0.25,
+        {
+            Position = UDim2.new(0, 0, 0, 0)
+        }
+    ):Play()
+
+    task.delay(Duration, function()
+
+        if not Notification.Parent then
+            return
+        end
+
+        local Out = Tween(
+            Notification,
+            0.25,
+            {
+                Position = UDim2.new(1, 25, 0, 0),
+                BackgroundTransparency = 1
+            }
+        )
+
+        Out:Play()
+
+        Out.Completed:Connect(function()
+
+            if Notification.Parent then
+                Notification:Destroy()
+            end
+
+        end)
+
+    end)
+
+    return Notification
+end
+
+--==================================================
 -- Create Window
 --==================================================
 
@@ -75,6 +225,10 @@ function WALLXP:CreateWindow(Settings)
 
     local WindowName = Settings.Name or "WALLXP"
     local WindowSubtitle = Settings.Subtitle or "Custom UI Library"
+
+    --==================================================
+    -- Window
+    --==================================================
 
     local Window = Create("Frame", {
         Name = "Window",
@@ -87,7 +241,7 @@ function WALLXP:CreateWindow(Settings)
     AddCorner(Window, 12)
 
     --==================================================
-    -- Top Bar
+    -- TopBar
     --==================================================
 
     local TopBar = Create("Frame", {
@@ -96,10 +250,14 @@ function WALLXP:CreateWindow(Settings)
         BackgroundTransparency = 1
     }, Window)
 
+    --==================================================
+    -- Title
+    --==================================================
+
     Create("TextLabel", {
         Name = "Title",
         Position = UDim2.fromOffset(20, 8),
-        Size = UDim2.new(1, -80, 0, 25),
+        Size = UDim2.new(1, -180, 0, 25),
         BackgroundTransparency = 1,
         Text = WindowName,
         TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -108,10 +266,14 @@ function WALLXP:CreateWindow(Settings)
         TextXAlignment = Enum.TextXAlignment.Left
     }, TopBar)
 
+    --==================================================
+    -- Subtitle
+    --==================================================
+
     Create("TextLabel", {
         Name = "Subtitle",
         Position = UDim2.fromOffset(21, 33),
-        Size = UDim2.new(1, -80, 0, 18),
+        Size = UDim2.new(1, -180, 0, 18),
         BackgroundTransparency = 1,
         Text = WindowSubtitle,
         TextColor3 = Color3.fromRGB(145, 145, 150),
@@ -119,6 +281,26 @@ function WALLXP:CreateWindow(Settings)
         Font = Enum.Font.Gotham,
         TextXAlignment = Enum.TextXAlignment.Left
     }, TopBar)
+
+    --==================================================
+    -- Minimize
+    --==================================================
+
+    local Minimize = Create("TextButton", {
+        Name = "Minimize",
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -55, 0.5, 0),
+        Size = UDim2.fromOffset(32, 32),
+        BackgroundColor3 = Color3.fromRGB(31, 31, 37),
+        BorderSizePixel = 0,
+        Text = "—",
+        TextColor3 = Color3.fromRGB(225, 225, 225),
+        TextSize = 18,
+        Font = Enum.Font.GothamBold,
+        AutoButtonColor = false
+    }, TopBar)
+
+    AddCorner(Minimize, 8)
 
     --==================================================
     -- Close
@@ -139,10 +321,6 @@ function WALLXP:CreateWindow(Settings)
     }, TopBar)
 
     AddCorner(Close, 8)
-
-    Close.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
 
     --==================================================
     -- Main Area
@@ -187,7 +365,9 @@ function WALLXP:CreateWindow(Settings)
         SortOrder = Enum.SortOrder.LayoutOrder
     }, TabList)
 
-    TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    TabLayout:GetPropertyChangedSignal(
+        "AbsoluteContentSize"
+    ):Connect(function()
 
         TabList.CanvasSize = UDim2.fromOffset(
             0,
@@ -208,6 +388,34 @@ function WALLXP:CreateWindow(Settings)
     }, MainArea)
 
     --==================================================
+    -- Restore Button
+    --==================================================
+
+    local Restore = Create("TextButton", {
+        Name = "Restore",
+        AnchorPoint = Vector2.new(0, 1),
+        Position = UDim2.new(0, 18, 1, -18),
+        Size = UDim2.fromOffset(55, 55),
+        BackgroundColor3 = Color3.fromRGB(20, 20, 26),
+        BorderSizePixel = 0,
+        Text = "W",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 20,
+        Font = Enum.Font.GothamBold,
+        Visible = false,
+        AutoButtonColor = false
+    }, ScreenGui)
+
+    AddCorner(Restore, 14)
+
+    AddStroke(
+        Restore,
+        Color3.fromRGB(70, 130, 255),
+        0.15,
+        2
+    )
+
+    --==================================================
     -- Window Object
     --==================================================
 
@@ -219,6 +427,77 @@ function WALLXP:CreateWindow(Settings)
     WindowObject.Pages = PageContainer
     WindowObject.Tabs = {}
     WindowObject.CurrentTab = nil
+    WindowObject.Minimized = false
+
+    --==================================================
+    -- Minimize
+    --==================================================
+
+    Minimize.MouseButton1Click:Connect(function()
+
+        if WindowObject.Minimized then
+            return
+        end
+
+        WindowObject.Minimized = true
+
+        MainArea.Visible = false
+
+        Tween(
+            Window,
+            0.25,
+            {
+                Size = UDim2.fromOffset(600, 58)
+            }
+        ):Play()
+
+        Restore.Visible = true
+
+    end)
+
+    --==================================================
+    -- Restore
+    --==================================================
+
+    Restore.MouseButton1Click:Connect(function()
+
+        if not WindowObject.Minimized then
+            return
+        end
+
+        WindowObject.Minimized = false
+
+        Restore.Visible = false
+
+        Tween(
+            Window,
+            0.25,
+            {
+                Size = UDim2.fromOffset(600, 330)
+            }
+        ):Play()
+
+        task.delay(0.12, function()
+
+            if Window.Parent then
+                MainArea.Visible = true
+            end
+
+        end)
+
+    end)
+
+    --==================================================
+    -- Close
+    --==================================================
+
+    Close.MouseButton1Click:Connect(function()
+
+        if ScreenGui.Parent then
+            ScreenGui:Destroy()
+        end
+
+    end)
 
     --==================================================
     -- Create Tab
@@ -227,6 +506,10 @@ function WALLXP:CreateWindow(Settings)
     function WindowObject:CreateTab(Name)
 
         Name = Name or "Tab"
+
+        --==================================================
+        -- Tab Button
+        --==================================================
 
         local TabButton = Create("TextButton", {
             Name = Name .. "_Button",
@@ -247,6 +530,10 @@ function WALLXP:CreateWindow(Settings)
             PaddingLeft = UDim.new(0, 12)
         }, TabButton)
 
+        --==================================================
+        -- Page
+        --==================================================
+
         local Page = Create("ScrollingFrame", {
             Name = Name .. "_Page",
             Size = UDim2.new(1, 0, 1, 0),
@@ -262,7 +549,9 @@ function WALLXP:CreateWindow(Settings)
             SortOrder = Enum.SortOrder.LayoutOrder
         }, Page)
 
-        PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        PageLayout:GetPropertyChangedSignal(
+            "AbsoluteContentSize"
+        ):Connect(function()
 
             Page.CanvasSize = UDim2.fromOffset(
                 0,
@@ -293,8 +582,11 @@ function WALLXP:CreateWindow(Settings)
                     Previous.Button,
                     0.15,
                     {
-                        BackgroundColor3 = Color3.fromRGB(27, 27, 33),
-                        TextColor3 = Color3.fromRGB(170, 170, 175)
+                        BackgroundColor3 =
+                            Color3.fromRGB(27, 27, 33),
+
+                        TextColor3 =
+                            Color3.fromRGB(170, 170, 175)
                     }
                 ):Play()
 
@@ -308,8 +600,11 @@ function WALLXP:CreateWindow(Settings)
                 TabButton,
                 0.15,
                 {
-                    BackgroundColor3 = Color3.fromRGB(45, 45, 55),
-                    TextColor3 = Color3.fromRGB(255, 255, 255)
+                    BackgroundColor3 =
+                        Color3.fromRGB(45, 45, 55),
+
+                    TextColor3 =
+                        Color3.fromRGB(255, 255, 255)
                 }
             ):Play()
 
@@ -337,6 +632,7 @@ function WALLXP:CreateWindow(Settings)
             }, Page)
 
             return Section
+
         end
 
         --==================================================
@@ -367,7 +663,8 @@ function WALLXP:CreateWindow(Settings)
                     Button,
                     0.08,
                     {
-                        BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+                        BackgroundColor3 =
+                            Color3.fromRGB(50, 50, 60)
                     }
                 ):Play()
 
@@ -379,7 +676,8 @@ function WALLXP:CreateWindow(Settings)
                             Button,
                             0.12,
                             {
-                                BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+                                BackgroundColor3 =
+                                    Color3.fromRGB(30, 30, 36)
                             }
                         ):Play()
 
@@ -394,6 +692,7 @@ function WALLXP:CreateWindow(Settings)
             end)
 
             return Button
+
         end
 
         --==================================================
@@ -456,7 +755,8 @@ function WALLXP:CreateWindow(Settings)
                         Switch,
                         0.15,
                         {
-                            BackgroundColor3 = Color3.fromRGB(70, 130, 255)
+                            BackgroundColor3 =
+                                Color3.fromRGB(70, 130, 255)
                         }
                     ):Play()
 
@@ -464,7 +764,8 @@ function WALLXP:CreateWindow(Settings)
                         Circle,
                         0.15,
                         {
-                            Position = UDim2.new(1, -19, 0.5, 0)
+                            Position =
+                                UDim2.new(1, -19, 0.5, 0)
                         }
                     ):Play()
 
@@ -474,7 +775,8 @@ function WALLXP:CreateWindow(Settings)
                         Switch,
                         0.15,
                         {
-                            BackgroundColor3 = Color3.fromRGB(55, 55, 62)
+                            BackgroundColor3 =
+                                Color3.fromRGB(55, 55, 62)
                         }
                     ):Play()
 
@@ -482,14 +784,18 @@ function WALLXP:CreateWindow(Settings)
                         Circle,
                         0.15,
                         {
-                            Position = UDim2.new(0, 3, 0.5, 0)
+                            Position =
+                                UDim2.new(0, 3, 0.5, 0)
                         }
                     ):Play()
 
                 end
 
                 if Settings.Callback then
-                    task.spawn(Settings.Callback, State)
+                    task.spawn(
+                        Settings.Callback,
+                        State
+                    )
                 end
 
             end
@@ -509,6 +815,7 @@ function WALLXP:CreateWindow(Settings)
             function ToggleObject:Set(Value)
 
                 State = Value == true
+
                 Update()
 
             end
@@ -522,6 +829,7 @@ function WALLXP:CreateWindow(Settings)
             ToggleObject.Instance = Toggle
 
             return ToggleObject
+
         end
 
         --==================================================
@@ -533,11 +841,15 @@ function WALLXP:CreateWindow(Settings)
             Settings = Settings or {}
 
             local Range = Settings.Range or {0, 100}
-            local Minimum = Range[1]
-            local Maximum = Range[2]
 
-            local Increment = Settings.Increment or 1
-            local CurrentValue = Settings.CurrentValue or Minimum
+            local Minimum = tonumber(Range[1]) or 0
+            local Maximum = tonumber(Range[2]) or 100
+
+            local Increment =
+                tonumber(Settings.Increment) or 1
+
+            local CurrentValue =
+                tonumber(Settings.CurrentValue) or Minimum
 
             CurrentValue = math.clamp(
                 CurrentValue,
@@ -567,7 +879,7 @@ function WALLXP:CreateWindow(Settings)
 
             local ValueLabel = Create("TextLabel", {
                 AnchorPoint = Vector2.new(1, 0),
-                Position = UDim2.new(1, -14, 7, 0),
+                Position = UDim2.new(1, -14, 0, 7),
                 Size = UDim2.fromOffset(55, 20),
                 BackgroundTransparency = 1,
                 Text = tostring(CurrentValue),
@@ -586,10 +898,16 @@ function WALLXP:CreateWindow(Settings)
 
             AddCorner(Bar, 4)
 
+            local Denominator =
+                math.max(Maximum - Minimum, 1)
+
+            local InitialPercent =
+                (CurrentValue - Minimum) /
+                Denominator
+
             local Fill = Create("Frame", {
                 Size = UDim2.new(
-                    (CurrentValue - Minimum) /
-                    (Maximum - Minimum),
+                    InitialPercent,
                     0,
                     1,
                     0
@@ -600,9 +918,24 @@ function WALLXP:CreateWindow(Settings)
 
             AddCorner(Fill, 4)
 
+            local Knob = Create("Frame", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(
+                    InitialPercent,
+                    0,
+                    0.5,
+                    0
+                ),
+                Size = UDim2.fromOffset(14, 14),
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BorderSizePixel = 0
+            }, Bar)
+
+            AddCorner(Knob, 7)
+
             local Hitbox = Create("TextButton", {
-                Position = UDim2.fromOffset(0, -10),
-                Size = UDim2.new(1, 0, 1, 20),
+                Position = UDim2.fromOffset(0, -12),
+                Size = UDim2.new(1, 0, 1, 24),
                 BackgroundTransparency = 1,
                 Text = ""
             }, Bar)
@@ -611,23 +944,32 @@ function WALLXP:CreateWindow(Settings)
 
             local function SetValue(Value)
 
-                Value = math.clamp(Value, Minimum, Maximum)
+                Value = math.clamp(
+                    Value,
+                    Minimum,
+                    Maximum
+                )
 
-                Value = math.floor(
-                    ((Value - Minimum) / Increment) + 0.5
-                ) * Increment + Minimum
+                Value =
+                    math.floor(
+                        ((Value - Minimum) / Increment) + 0.5
+                    ) * Increment + Minimum
 
-                Value = math.clamp(Value, Minimum, Maximum)
+                Value = math.clamp(
+                    Value,
+                    Minimum,
+                    Maximum
+                )
 
                 CurrentValue = Value
 
                 local Percent =
                     (Value - Minimum) /
-                    (Maximum - Minimum)
+                    Denominator
 
                 Tween(
                     Fill,
-                    0.1,
+                    0.08,
                     {
                         Size = UDim2.new(
                             Percent,
@@ -638,26 +980,53 @@ function WALLXP:CreateWindow(Settings)
                     }
                 ):Play()
 
+                Tween(
+                    Knob,
+                    0.08,
+                    {
+                        Position = UDim2.new(
+                            Percent,
+                            0,
+                            0.5,
+                            0
+                        )
+                    }
+                ):Play()
+
                 ValueLabel.Text = tostring(Value)
 
                 if Settings.Callback then
-                    task.spawn(Settings.Callback, Value)
+
+                    task.spawn(
+                        Settings.Callback,
+                        Value
+                    )
+
                 end
 
             end
 
             local function UpdateFromInput(Input)
 
+                if Bar.AbsoluteSize.X <= 0 then
+                    return
+                end
+
                 local Percent = math.clamp(
-                    (Input.Position.X - Bar.AbsolutePosition.X) /
-                    Bar.AbsoluteSize.X,
+                    (
+                        Input.Position.X -
+                        Bar.AbsolutePosition.X
+                    ) / Bar.AbsoluteSize.X,
                     0,
                     1
                 )
 
                 local Value =
                     Minimum +
-                    ((Maximum - Minimum) * Percent)
+                    (
+                        (Maximum - Minimum) *
+                        Percent
+                    )
 
                 SetValue(Value)
 
@@ -665,8 +1034,10 @@ function WALLXP:CreateWindow(Settings)
 
             Hitbox.InputBegan:Connect(function(Input)
 
-                if Input.UserInputType == Enum.UserInputType.MouseButton1
-                or Input.UserInputType == Enum.UserInputType.Touch then
+                if Input.UserInputType ==
+                    Enum.UserInputType.MouseButton1
+                    or Input.UserInputType ==
+                    Enum.UserInputType.Touch then
 
                     Dragging = true
 
@@ -682,8 +1053,10 @@ function WALLXP:CreateWindow(Settings)
                     return
                 end
 
-                if Input.UserInputType == Enum.UserInputType.MouseMovement
-                or Input.UserInputType == Enum.UserInputType.Touch then
+                if Input.UserInputType ==
+                    Enum.UserInputType.MouseMovement
+                    or Input.UserInputType ==
+                    Enum.UserInputType.Touch then
 
                     UpdateFromInput(Input)
 
@@ -693,8 +1066,10 @@ function WALLXP:CreateWindow(Settings)
 
             UserInputService.InputEnded:Connect(function(Input)
 
-                if Input.UserInputType == Enum.UserInputType.MouseButton1
-                or Input.UserInputType == Enum.UserInputType.Touch then
+                if Input.UserInputType ==
+                    Enum.UserInputType.MouseButton1
+                    or Input.UserInputType ==
+                    Enum.UserInputType.Touch then
 
                     Dragging = false
 
@@ -705,16 +1080,23 @@ function WALLXP:CreateWindow(Settings)
             local SliderObject = {}
 
             function SliderObject:Set(Value)
-                SetValue(Value)
+
+                SetValue(
+                    tonumber(Value) or Minimum
+                )
+
             end
 
             function SliderObject:Get()
+
                 return CurrentValue
+
             end
 
             SliderObject.Instance = Slider
 
             return SliderObject
+
         end
 
         --==================================================
@@ -726,6 +1108,7 @@ function WALLXP:CreateWindow(Settings)
             Settings = Settings or {}
 
             local Options = Settings.Options or {}
+
             local CurrentOption =
                 Settings.CurrentOption or Options[1]
 
@@ -782,10 +1165,13 @@ function WALLXP:CreateWindow(Settings)
                 Font = Enum.Font.GothamBold
             }, SelectButton)
 
-            local OptionList = Create("Frame", {
+            local OptionList = Create("ScrollingFrame", {
                 Position = UDim2.fromOffset(8, 45),
                 Size = UDim2.new(1, -16, 0, 0),
-                BackgroundTransparency = 1
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                ScrollBarThickness = 2,
+                CanvasSize = UDim2.new(0, 0, 0, 0)
             }, Dropdown)
 
             local OptionLayout = Create("UIListLayout", {
@@ -793,14 +1179,32 @@ function WALLXP:CreateWindow(Settings)
                 SortOrder = Enum.SortOrder.LayoutOrder
             }, OptionList)
 
+            OptionLayout:GetPropertyChangedSignal(
+                "AbsoluteContentSize"
+            ):Connect(function()
+
+                OptionList.CanvasSize =
+                    UDim2.fromOffset(
+                        0,
+                        OptionLayout.AbsoluteContentSize.Y + 5
+                    )
+
+            end)
+
             local function SelectOption(Option)
 
                 CurrentOption = Option
 
-                SelectedLabel.Text = tostring(Option)
+                SelectedLabel.Text =
+                    tostring(Option)
 
                 if Settings.Callback then
-                    task.spawn(Settings.Callback, Option)
+
+                    task.spawn(
+                        Settings.Callback,
+                        Option
+                    )
+
                 end
 
             end
@@ -808,6 +1212,7 @@ function WALLXP:CreateWindow(Settings)
             for _, Option in ipairs(Options) do
 
                 local OptionButton = Create("TextButton", {
+                    Name = "Option",
                     Size = UDim2.new(1, 0, 0, 32),
                     BackgroundColor3 = Color3.fromRGB(38, 38, 45),
                     BorderSizePixel = 0,
@@ -826,13 +1231,16 @@ function WALLXP:CreateWindow(Settings)
 
                     Opened = false
 
-                    local Height = 42
-
                     Tween(
                         Dropdown,
                         0.15,
                         {
-                            Size = UDim2.new(1, -6, 0, Height)
+                            Size = UDim2.new(
+                                1,
+                                -6,
+                                0,
+                                42
+                            )
                         }
                     ):Play()
 
@@ -849,8 +1257,10 @@ function WALLXP:CreateWindow(Settings)
                 if Opened then
 
                     local Height =
-                        50 +
-                        (#Options * 36)
+                        math.min(
+                            50 + (#Options * 36),
+                            230
+                        )
 
                     Tween(
                         Dropdown,
@@ -861,6 +1271,19 @@ function WALLXP:CreateWindow(Settings)
                                 -6,
                                 0,
                                 Height
+                            )
+                        }
+                    ):Play()
+
+                    Tween(
+                        OptionList,
+                        0.2,
+                        {
+                            Size = UDim2.new(
+                                1,
+                                -16,
+                                0,
+                                Height - 50
                             )
                         }
                     ):Play()
@@ -915,13 +1338,273 @@ function WALLXP:CreateWindow(Settings)
             DropdownObject.Instance = Dropdown
 
             return DropdownObject
+
+        end
+
+        --==================================================
+        -- Input
+        --==================================================
+
+        function Tab:CreateInput(Settings)
+
+            Settings = Settings or {}
+
+            local InputFrame = Create("Frame", {
+                Name = "Input",
+                Size = UDim2.new(1, -6, 0, 58),
+                BackgroundColor3 = Color3.fromRGB(30, 30, 36),
+                BorderSizePixel = 0
+            }, Page)
+
+            AddCorner(InputFrame, 8)
+
+            Create("TextLabel", {
+                Position = UDim2.fromOffset(14, 6),
+                Size = UDim2.new(1, -28, 0, 20),
+                BackgroundTransparency = 1,
+                Text = Settings.Name or "Input",
+                TextColor3 = Color3.fromRGB(235, 235, 235),
+                TextSize = 12,
+                Font = Enum.Font.GothamMedium,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, InputFrame)
+
+            local Box = Create("TextBox", {
+                Position = UDim2.fromOffset(14, 30),
+                Size = UDim2.new(1, -28, 0, 22),
+                BackgroundColor3 = Color3.fromRGB(43, 43, 50),
+                BorderSizePixel = 0,
+                Text = Settings.Default or "",
+                PlaceholderText =
+                    Settings.PlaceholderText or "Enter text...",
+                PlaceholderColor3 =
+                    Color3.fromRGB(125, 125, 132),
+                TextColor3 =
+                    Color3.fromRGB(235, 235, 235),
+                TextSize = 11,
+                Font = Enum.Font.Gotham,
+                ClearTextOnFocus =
+                    Settings.ClearTextOnFocus == true
+            }, InputFrame)
+
+            AddCorner(Box, 6)
+
+            Create("UIPadding", {
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8)
+            }, Box)
+
+            Box.FocusLost:Connect(function(EnterPressed)
+
+                if Settings.Callback then
+
+                    task.spawn(
+                        Settings.Callback,
+                        Box.Text,
+                        EnterPressed
+                    )
+
+                end
+
+            end)
+
+            local InputObject = {}
+
+            function InputObject:Set(Text)
+
+                Box.Text = tostring(Text)
+
+            end
+
+            function InputObject:Get()
+
+                return Box.Text
+
+            end
+
+            InputObject.Instance = InputFrame
+            InputObject.TextBox = Box
+
+            return InputObject
+
+        end
+
+        --==================================================
+        -- Keybind
+        --==================================================
+
+        function Tab:CreateKeybind(Settings)
+
+            Settings = Settings or {}
+
+            local CurrentKey =
+                Settings.CurrentKeybind or
+                Enum.KeyCode.RightShift
+
+            local Listening = false
+
+            local Keybind = Create("TextButton", {
+                Name = "Keybind",
+                Size = UDim2.new(1, -6, 0, 46),
+                BackgroundColor3 = Color3.fromRGB(30, 30, 36),
+                BorderSizePixel = 0,
+                Text = "",
+                AutoButtonColor = false
+            }, Page)
+
+            AddCorner(Keybind, 8)
+
+            Create("TextLabel", {
+                Position = UDim2.fromOffset(14, 0),
+                Size = UDim2.new(1, -120, 1, 0),
+                BackgroundTransparency = 1,
+                Text = Settings.Name or "Keybind",
+                TextColor3 = Color3.fromRGB(235, 235, 235),
+                TextSize = 13,
+                Font = Enum.Font.GothamMedium,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, Keybind)
+
+            local KeyLabel = Create("TextLabel", {
+                AnchorPoint = Vector2.new(1, 0.5),
+                Position = UDim2.new(1, -12, 0.5, 0),
+                Size = UDim2.fromOffset(90, 28),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 53),
+                BorderSizePixel = 0,
+                Text = CurrentKey.Name,
+                TextColor3 = Color3.fromRGB(200, 200, 210),
+                TextSize = 11,
+                Font = Enum.Font.GothamMedium
+            }, Keybind)
+
+            AddCorner(KeyLabel, 6)
+
+            Keybind.MouseButton1Click:Connect(function()
+
+                if Listening then
+                    return
+                end
+
+                Listening = true
+
+                KeyLabel.Text = "Press key..."
+
+                Tween(
+                    KeyLabel,
+                    0.15,
+                    {
+                        BackgroundColor3 =
+                            Color3.fromRGB(70, 130, 255)
+                    }
+                ):Play()
+
+            end)
+
+            local KeyConnection
+
+            KeyConnection =
+                UserInputService.InputBegan:Connect(
+                    function(Input, GameProcessed)
+
+                        if Listening then
+
+                            if Input.UserInputType ==
+                                Enum.UserInputType.Keyboard then
+
+                                CurrentKey =
+                                    Input.KeyCode
+
+                                KeyLabel.Text =
+                                    CurrentKey.Name
+
+                                Listening = false
+
+                                Tween(
+                                    KeyLabel,
+                                    0.15,
+                                    {
+                                        BackgroundColor3 =
+                                            Color3.fromRGB(
+                                                45,
+                                                45,
+                                                53
+                                            )
+                                    }
+                                ):Play()
+
+                            end
+
+                            return
+                        end
+
+                        if GameProcessed then
+                            return
+                        end
+
+                        if Input.KeyCode ==
+                            CurrentKey then
+
+                            if Settings.Callback then
+
+                                task.spawn(
+                                    Settings.Callback,
+                                    CurrentKey
+                                )
+
+                            end
+
+                        end
+
+                    end
+                )
+
+            local KeybindObject = {}
+
+            function KeybindObject:Set(Key)
+
+                if typeof(Key) == "EnumItem" then
+
+                    CurrentKey = Key
+
+                    KeyLabel.Text =
+                        CurrentKey.Name
+
+                end
+
+            end
+
+            function KeybindObject:Get()
+
+                return CurrentKey
+
+            end
+
+            function KeybindObject:Destroy()
+
+                if KeyConnection then
+                    KeyConnection:Disconnect()
+                end
+
+                if Keybind.Parent then
+                    Keybind:Destroy()
+                end
+
+            end
+
+            KeybindObject.Instance = Keybind
+
+            return KeybindObject
+
         end
 
         --==================================================
         -- Store Tab
         --==================================================
 
-        table.insert(WindowObject.Tabs, Tab)
+        table.insert(
+            WindowObject.Tabs,
+            Tab
+        )
 
         if #WindowObject.Tabs == 1 then
             Tab:Select()
@@ -932,7 +1615,7 @@ function WALLXP:CreateWindow(Settings)
     end
 
     --==================================================
-    -- Drag Window
+    -- Window Drag
     --==================================================
 
     local Dragging = false
@@ -941,17 +1624,23 @@ function WALLXP:CreateWindow(Settings)
 
     TopBar.InputBegan:Connect(function(Input)
 
-        if Input.UserInputType == Enum.UserInputType.MouseButton1
-        or Input.UserInputType == Enum.UserInputType.Touch then
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+            or Input.UserInputType ==
+            Enum.UserInputType.Touch then
 
             Dragging = true
+
             DragStart = Input.Position
             StartPosition = Window.Position
 
             Input.Changed:Connect(function()
 
-                if Input.UserInputState == Enum.UserInputState.End then
+                if Input.UserInputState ==
+                    Enum.UserInputState.End then
+
                     Dragging = false
+
                 end
 
             end)
@@ -966,10 +1655,13 @@ function WALLXP:CreateWindow(Settings)
             return
         end
 
-        if Input.UserInputType == Enum.UserInputType.MouseMovement
-        or Input.UserInputType == Enum.UserInputType.Touch then
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseMovement
+            or Input.UserInputType ==
+            Enum.UserInputType.Touch then
 
-            local Delta = Input.Position - DragStart
+            local Delta =
+                Input.Position - DragStart
 
             Window.Position = UDim2.new(
                 StartPosition.X.Scale,
@@ -983,7 +1675,69 @@ function WALLXP:CreateWindow(Settings)
 
     end)
 
+    --==================================================
+    -- Restore Button Drag
+    --==================================================
+
+    local RestoreDragging = false
+    local RestoreStart
+    local RestorePosition
+
+    Restore.InputBegan:Connect(function(Input)
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseButton1
+            or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            RestoreDragging = true
+
+            RestoreStart = Input.Position
+            RestorePosition = Restore.Position
+
+            Input.Changed:Connect(function()
+
+                if Input.UserInputState ==
+                    Enum.UserInputState.End then
+
+                    RestoreDragging = false
+
+                end
+
+            end)
+
+        end
+
+    end)
+
+    UserInputService.InputChanged:Connect(function(Input)
+
+        if not RestoreDragging then
+            return
+        end
+
+        if Input.UserInputType ==
+            Enum.UserInputType.MouseMovement
+            or Input.UserInputType ==
+            Enum.UserInputType.Touch then
+
+            local Delta =
+                Input.Position - RestoreStart
+
+            Restore.Position = UDim2.new(
+                RestorePosition.X.Scale,
+                RestorePosition.X.Offset + Delta.X,
+
+                RestorePosition.Y.Scale,
+                RestorePosition.Y.Offset + Delta.Y
+            )
+
+        end
+
+    end)
+
     return WindowObject
+
 end
 
 return WALLXP
