@@ -69,8 +69,8 @@ function WALLXP:CreateWindow(Settings)
 
     local Window = Create("Frame", {
         Name = "Window",
-        Size = UDim2.fromOffset(650, 420),
-        Position = UDim2.new(0.5, -325, 0.5, -210),
+        Size = UDim2.fromOffset(600, 330),
+            Position = UDim2.new(0.5, -300, 0.5, -165),
         BackgroundColor3 = Color3.fromRGB(17, 17, 21),
         BorderSizePixel = 0
     }, ScreenGui)
